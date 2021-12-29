@@ -10,6 +10,7 @@ import time
 import json
 import os
 import argparse
+from pathlib import Path
 
 
 import requests
@@ -82,10 +83,19 @@ class panoptoDownloader:
 
         logger.finished_task(task_id)
 
-    def run(self, mode:str):
+    def run(self, mode:str, chrome_path: str, num_threads: int):
         
         # Open Panopto
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        options = webdriver.ChromeOptions() 
+        if chrome_path is not None:
+            c_path = Path(chrome_path)
+            profile_dir = str(c_path.parent)
+            profile_name = str(c_path.name)
+                        
+            options.add_argument("user-data-dir={}".format(profile_dir)) #Path to your chrome profile
+            options.add_argument("profile-directory={}".format(profile_name))
+
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
         driver.get(self.BASE_URL)
 
         input("Press any key once loaded!")
@@ -107,7 +117,7 @@ class panoptoDownloader:
 
         # Download
         logger = StatusLogger()
-        executor = ThreadPoolExecutor(max_workers=4)
+        executor = ThreadPoolExecutor(max_workers=num_threads)
         task_id = 0
 
         for video in videos:
@@ -140,7 +150,10 @@ if __name__ == "__main__":
     parser.add_argument('-outdir', dest='outdir', action='store',
                     default="out", help='output directory (default: out/)')
 
+    parser.add_argument('--chrome-profile-path', dest='chrome_path', action='store', help='path of chrome user if wanting to use normal profile')
+    parser.add_argument('--num-threads', dest='num_threads', action='store', default=None, help='number of threads, default to ThreadPoolExecutor max_workers')
+
     args = parser.parse_args()
 
     dl = panoptoDownloader(args.url, args.outdir)
-    dl.run(args.mode)
+    dl.run(args.mode, args.chrome_path, args.num_threads)
