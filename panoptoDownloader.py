@@ -17,7 +17,7 @@ import requests
 
 class panoptoDownloader:
     
-    def __init__(self, base_url: str, directory: str) -> None:
+    def __init__(self, base_url: str, directory: str):
         self.BASE_URL = base_url
         self.s = requests.Session()
         self.directory = directory

@@ -2,7 +2,7 @@ import threading
 import sys
 
 class Task:
-    def __init__(self, task_name: str, progress: int) -> None:
+    def __init__(self, task_name: str, progress: int):
         self.task_name = task_name
         self.progress = progress
         self.lock = threading.Lock()
@@ -15,7 +15,7 @@ class Task:
 
 class StatusLogger:
     
-    def __init__(self) -> None:
+    def __init__(self):
         self.active_tasks = {} # task_id -> task
         self.completed_tasks = []
         self.lock = threading.RLock()
@@ -37,7 +37,7 @@ class StatusLogger:
         self.completed_tasks.append(completed)
         self.lock.release()
 
-    def print_progress_bar(self,status,max,text):
+    def print_progress_bar(self, status: int, max: int, text: str):
         n_bar =10 #size of progress bar
         j= status/max
         sys.stdout.write("\033[K") # clear line
