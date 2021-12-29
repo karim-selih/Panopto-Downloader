@@ -63,7 +63,7 @@ class panoptoDownloader:
         'responseType': 'json'
         }
 
-        response = self.s.post(self.BASE_URL+'Panopto/Pages/Viewer/DeliveryInfo.aspx',data=data)
+        response = self.s.post(self.BASE_URL+'/Panopto/Pages/Viewer/DeliveryInfo.aspx',data=data)
 
         res = json.loads(response.text)
 
