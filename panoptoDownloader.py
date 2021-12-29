@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 import time
 import json
 import os
+import argparse
 
 
 import requests
@@ -80,7 +81,7 @@ class panoptoDownloader:
 
         logger.finished_task(task_id)
 
-    def run(self):
+    def run(self, mode:str):
         
         # Open Panopto
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), chrome_options=options)
@@ -94,7 +95,14 @@ class panoptoDownloader:
             self.s.cookies.set(cookie['name'], cookie['value'])
 
         # Get videos
-        videos = self.get_visible_videos(driver)
+        if mode == "visible_videos":
+            videos = self.get_visible_videos(driver)
+        elif mode == "open_tabs":
+            videos = self.get_open_tabs(driver)
+        else:
+            videos = []
+
+        driver.quit()
 
         # Download
         logger = StatusLogger()
@@ -122,6 +130,15 @@ class panoptoDownloader:
 
 
 if __name__ == "__main__":
-    URL = "https://imperial.cloud.panopto.eu/"
-    dl = panoptoDownloader(URL, "out")
-    dl.run()
+    parser = argparse.ArgumentParser(description='-Panopto Downloader-')
+    parser.add_argument('-url', metavar='url', type=str, help='[REQ] panopto url', required=True)
+    parser.add_argument('-mode', metavar='mode', type=str, help='choode mode',
+                        choices=["visible_videos", "open_tabs"], default="visible_videos")
+
+    parser.add_argument('-outdir', dest='outdir', action='store',
+                    default="out", help='output directory (default: out/)')
+
+    args = parser.parse_args()
+
+    dl = panoptoDownloader(args.url, args.outdir)
+    dl.run(args.mode)
