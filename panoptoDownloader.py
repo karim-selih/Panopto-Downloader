@@ -42,7 +42,15 @@ class panoptoDownloader:
 
     # Get's open videos from tabs
     def get_open_tabs(self, driver: WebDriver) -> list[str]:
-        pass
+        videos = []
+        for handle in driver.window_handles:
+            driver.switch_to.window(handle)
+            curr_url = driver.current_url
+            if "id=" in curr_url:
+                id = curr_url.split("id=")[1]
+                videos.append(self.get_video_data(id))
+
+        return videos
    
     
     def get_video_data(self, id: str) -> dict[str, str]:
