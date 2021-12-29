@@ -1,6 +1,6 @@
 # Panopto Downloader
 ## Disclaimer
-You should check with your university if you are allowed to download recorings using this tool.
+You should check with your university if you are allowed to download recordings using this tool.
 
 ## Installation
 ### Requirements
@@ -17,7 +17,7 @@ There are currently two modes, visible_videos and open_tabs. open_tabs will only
 ### Arguments
 | Argument              | Type | Description                                                                                                                                              | Required | Default                |
 |-----------------------|------|----------------------------------------------------------------------------------------------------------------------------------------------------------|----------|------------------------|
-| -url                  | str  | url to be opened by chrome <br /> example: https://imperial.cloud.panopto.eu                                                                                    | YES      | NONE                   |
+| -url                  | str  | base url of your institutions panopto service <br /> example: https://imperial.cloud.panopto.eu                                                                                    | YES      | NONE                   |
 | -mode                 | str  | mode of extracting videos to download <br /> select from ["visible_videos", "open_tabs"]                                                                        | NO       | visible_videos         |
 | -outdir               | str  | directory to save all videos to                                                                                                                          | NO       | out                    |
 | --chrome-profile-path | str  | path for chrome profile (to minimise signing in)  <br /> read: https://www.howtogeek.com/255653/how-to-find-your-chrome-profile-folder-on-windows-mac-and-linux/ | NO       | NONE                   |
