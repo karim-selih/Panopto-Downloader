@@ -19,6 +19,7 @@ class panoptoDownloader:
     def __init__(self, base_url: str, directory: str) -> None:
         self.BASE_URL = base_url
         self.s = requests.Session()
+        self.directory = directory
 
         # Make directory
         if not os.path.isdir(directory):
@@ -84,7 +85,7 @@ class panoptoDownloader:
     def run(self, mode:str):
         
         # Open Panopto
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), chrome_options=options)
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
         driver.get(self.BASE_URL)
 
         input("Press any key once loaded!")
@@ -112,7 +113,7 @@ class panoptoDownloader:
         for video in videos:
             logger.add_task(video["name"], task_id)
             
-            out = "out/{}.mp4".format(video["name"])
+            out = "{}/{}.mp4".format(self.directory, video["name"])
 
             executor.submit(self.download, out, video["link"], task_id, logger)
             task_id += 1
@@ -124,6 +125,7 @@ class panoptoDownloader:
             logger.reprint()
             time.sleep(0.5)
 
+        logger.reprint()
         print("Completed!")
 
         executor.shutdown(wait=True)
