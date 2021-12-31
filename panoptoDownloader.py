@@ -151,7 +151,7 @@ if __name__ == "__main__":
                     default="out", help='output directory (default: out/)')
 
     parser.add_argument('--chrome-profile-path', dest='chrome_path', action='store', help='path of chrome user if wanting to use normal profile')
-    parser.add_argument('--num-threads', dest='num_threads', action='store', default=None, help='number of threads, default to ThreadPoolExecutor max_workers')
+    parser.add_argument('--num-threads', type=int, dest='num_threads', action='store', default=None, help='number of threads, default to ThreadPoolExecutor max_workers')
 
     args = parser.parse_args()
 
