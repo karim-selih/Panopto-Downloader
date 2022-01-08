@@ -11,6 +11,7 @@ import json
 import os
 import argparse
 from pathlib import Path
+import wget
 
 
 import requests
@@ -74,14 +75,27 @@ class panoptoDownloader:
 
     def download(self, out: str, link:str, task_id: int, logger: StatusLogger):
 
-        command = ['ffmpeg', '-f', 'hls', '-i', link, '-c', 'copy', out]
+        if link.endswith(".m3u8"):
+            command = ['ffmpeg', '-f', 'hls', '-i', link, '-c', 'copy', out]
 
-        ff = FfmpegProgress(command)
-        
-        for progress in ff.run_command_with_progress():
-            logger.update_state(task_id, progress)
+            ff = FfmpegProgress(command)
+            
+            for progress in ff.run_command_with_progress():
+                logger.update_state(task_id, progress)
 
-        logger.finished_task(task_id)
+            logger.finished_task(task_id)
+        elif link.endswith(".mp4"):
+            def wget_bar(current, total, _width):
+                progress = int((current/total) * 100)
+                logger.update_state(task_id, progress)
+            
+            wget.download(link,out = out, bar=wget_bar)
+
+            logger.finished_task(task_id)
+
+        else:
+            print(f"Could not download video, link type not supported")
+
 
     def run(self, mode:str, chrome_path: str, num_threads: int):
         
