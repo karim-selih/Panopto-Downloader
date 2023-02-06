@@ -69,7 +69,6 @@ class panoptoDownloader:
         return {"name": name, "link": link}
 
     def download(self, out: str, link: str, task_id: int, logger: StatusLogger):
-
         if link.endswith(".m3u8"):
             command = ["ffmpeg", "-f", "hls", "-i", link, "-c", "copy", out]
 
@@ -136,7 +135,10 @@ class panoptoDownloader:
         for video in videos:
             logger.add_task(video["name"], task_id)
 
-            out = "{}/{}.mp4".format(self.directory, video["name"])
+            # Remove invalid characters
+            video_name = video["name"].replace("/", "")
+
+            out = "{}/{}.mp4".format(self.directory, video_name)
 
             executor.submit(self.download, out, video["link"], task_id, logger)
             task_id += 1
