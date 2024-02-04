@@ -18,10 +18,11 @@ import requests
 
 
 class panoptoDownloader:
-    def __init__(self, base_url: str, directory: str):
+    def __init__(self, base_url: str, directory: str, all_streams: bool):
         self.BASE_URL = base_url
         self.s = requests.Session()
         self.directory = directory
+        self.all_streams = all_streams
 
         # Make directory
         if not os.path.isdir(directory):
@@ -39,7 +40,7 @@ class panoptoDownloader:
         videos = []
         for row in rows:
             if row["id"] != "panePlaceholder":
-                videos.append(self.get_video_data(row["id"]))
+                videos += self.get_video_data(row["id"])
 
         return videos
 
@@ -51,11 +52,11 @@ class panoptoDownloader:
             curr_url = driver.current_url
             if "id=" in curr_url:
                 id = curr_url.split("id=")[1]
-                videos.append(self.get_video_data(id))
+                videos += self.get_video_data(id)
 
         return videos
 
-    def get_video_data(self, id: str) -> dict[str, str]:
+    def get_video_data(self, id: str) -> list[dict[str, str]]:
         data = {"deliveryId": id, "isEmbed": "true", "responseType": "json"}
 
         response = self.s.post(
@@ -65,10 +66,18 @@ class panoptoDownloader:
         res = json.loads(response.text)
 
         name = res["Delivery"]["SessionName"]
-        link = res["Delivery"]["PodcastStreams"][0]["StreamUrl"]
-        return {"name": name, "link": link}
+        name = name.replace("/", " ")
+        videos = []
+        if self.all_streams:
+            for index, stream in enumerate(res["Delivery"]["Streams"]):
+                videos.append({"name": f"{name}_{index}", "link": stream["StreamUrl"]})
+        else:
+            link = res["Delivery"]["PodcastStreams"][0]["StreamUrl"]
+            videos.append({"name": name, "link": link})
+        return videos
 
     def download(self, out: str, link: str, task_id: int, logger: StatusLogger):
+
         if link.endswith(".m3u8"):
             command = ["ffmpeg", "-f", "hls", "-i", link, "-c", "copy", out]
 
@@ -192,7 +201,16 @@ if __name__ == "__main__":
         help="number of threads, default to ThreadPoolExecutor max_workers",
     )
 
+    parser.add_argument(
+        "--all-streams",
+        type=bool,
+        dest="all_streams",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="downlaod all video inputs",
+    )
+
     args = parser.parse_args()
 
-    dl = panoptoDownloader(args.url, args.outdir)
+    dl = panoptoDownloader(args.url, args.outdir, args.all_streams)
     dl.run(args.mode, args.chrome_path, args.num_threads)
